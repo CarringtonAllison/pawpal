@@ -10,8 +10,6 @@ const ConfigSchema = z.object({
 
   DB_PATH: z.string().default('./data/pawpal.db'),
 
-  PETFINDER_API_KEY: z.string().default(''),
-  PETFINDER_SECRET: z.string().default(''),
   RESCUE_GROUPS_API_KEY: z.string().default(''),
   ANTHROPIC_API_KEY: z.string().default(''),
 

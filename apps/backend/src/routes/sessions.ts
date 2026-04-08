@@ -178,8 +178,6 @@ export async function sessionRoutes(app: FastifyInstance, db: DbClient): Promise
 
     const config = loadConfig();
     const searchConfig: SearchConfig = {
-      petfinderApiKey: config.PETFINDER_API_KEY,
-      petfinderSecret: config.PETFINDER_SECRET,
       rescueGroupsApiKey: config.RESCUE_GROUPS_API_KEY || undefined,
     };
 
