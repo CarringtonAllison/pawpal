@@ -1,6 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import type { SSEEvent } from '@pawpal/shared';
 import type { DbClient } from '../db/client.js';
+import { runPipeline } from '../agents/orchestrator.js';
+import type { SearchConfig } from '../agents/searchAgent.js';
+import { loadConfig } from '../config.js';
 
 const CreateSessionBody = z.object({
   zipCode: z.string().regex(/^\d{5}$/).optional(),
@@ -146,7 +150,7 @@ export async function sessionRoutes(app: FastifyInstance, db: DbClient): Promise
     return { results };
   });
 
-  // Trigger search (placeholder — Phase 3 will add the agent pipeline)
+  // Trigger search with SSE streaming
   app.post('/api/sessions/:sessionId/search', async (request, reply) => {
     const params = SessionIdParam.safeParse(request.params);
     if (!params.success) {
@@ -168,8 +172,38 @@ export async function sessionRoutes(app: FastifyInstance, db: DbClient): Promise
       });
     }
 
-    db.updateSessionStatus(params.data.sessionId, 'searching');
+    const answers = session.answers_json ? JSON.parse(session.answers_json) : {};
+    const radiusParam = (request.query as Record<string, string>).radius;
+    const radius = radiusParam ? parseInt(radiusParam, 10) : 25;
 
-    return reply.status(202).send({ message: 'Search started' });
+    const config = loadConfig();
+    const searchConfig: SearchConfig = {
+      petfinderApiKey: config.PETFINDER_API_KEY,
+      petfinderSecret: config.PETFINDER_SECRET,
+      rescueGroupsApiKey: config.RESCUE_GROUPS_API_KEY || undefined,
+    };
+
+    // SSE response
+    reply.raw.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    });
+
+    const emitSSE = (event: SSEEvent): void => {
+      reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
+
+    await runPipeline(
+      params.data.sessionId,
+      answers,
+      radius,
+      db,
+      emitSSE,
+      request.log,
+      searchConfig,
+    );
+
+    reply.raw.end();
   });
 }

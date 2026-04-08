@@ -217,25 +217,39 @@ describe('POST /api/sessions/:sessionId/search', () => {
     sessionId = res.json().id;
   });
 
-  it('returns 202 and updates status to searching', async () => {
+  it('returns SSE stream (200) and pipeline updates session status', async () => {
+    // Save valid answers first so pipeline can run intake
+    await app.inject({
+      method: 'PATCH',
+      url: `/api/sessions/${sessionId}/answers`,
+      payload: {
+        zipCode: '10001', petType: 'dog', livingSpace: 'apartment',
+        activityLevel: 'moderate', experience: 'some', allergies: 'none',
+        agePreference: 'young', sizePreference: 'medium',
+        household: ['adults_only'], temperamentStyle: 'cuddly_affectionate',
+        noiseTolerance: 'fine_with_noise', breedNotes: null,
+      },
+    });
+
     const res = await app.inject({
       method: 'POST',
       url: `/api/sessions/${sessionId}/search`,
     });
-    expect(res.statusCode).toBe(202);
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['content-type']).toBe('text/event-stream');
 
+    // Session should have moved past 'questionnaire'
     const getRes = await app.inject({
       method: 'GET',
       url: `/api/sessions/${sessionId}`,
     });
-    expect(getRes.json().status).toBe('searching');
+    const status = getRes.json().status;
+    expect(['complete', 'partial', 'error']).toContain(status);
   });
 
   it('returns 409 when search is already in progress', async () => {
-    await app.inject({
-      method: 'POST',
-      url: `/api/sessions/${sessionId}/search`,
-    });
+    // Manually set status to searching
+    db.updateSessionStatus(sessionId, 'searching');
 
     const res = await app.inject({
       method: 'POST',
