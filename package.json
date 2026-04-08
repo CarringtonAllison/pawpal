@@ -8,7 +8,7 @@
     "apps/*"
   ],
   "scripts": {
-    "test": "vitest run",
+    "test": "npm run test --workspaces --if-present",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "dev:backend": "npm run dev -w @pawpal/backend",
