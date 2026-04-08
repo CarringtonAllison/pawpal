@@ -8,7 +8,7 @@ export type PetSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 export type ListingType = 'rescue' | 'foster' | 'breeder';
 
-export type PetSource = 'petfinder' | 'rescuegroups';
+export type PetSource = 'rescuegroups';
 
 export interface AnimalAttributes {
   environment: {
