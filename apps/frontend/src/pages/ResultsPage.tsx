@@ -81,9 +81,18 @@ export function ResultsPage() {
           {search.totalCount} matches found
         </p>
 
-        <div className="flex gap-6">
-          {/* Filter panel — desktop sidebar / mobile overlay */}
-          <div className={`${showFilters ? 'block' : 'hidden'} lg:block`}>
+        <div className="flex gap-6 relative">
+          {/* Filter panel — desktop sidebar / mobile bottom sheet */}
+          {showFilters && (
+            <div
+              className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+              onClick={() => setShowFilters(false)}
+            />
+          )}
+          <div className={`
+            ${showFilters ? 'fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl p-4 max-h-[80vh] overflow-y-auto' : 'hidden'}
+            lg:block lg:static lg:bg-transparent lg:shadow-none lg:p-0 lg:max-h-none lg:rounded-none lg:z-auto
+          `}>
             <FilterPanel
               filters={search.filters}
               onFilterChange={search.updateFilter}

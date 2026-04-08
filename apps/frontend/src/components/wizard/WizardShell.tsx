@@ -60,7 +60,7 @@ export function WizardShell() {
             <button
               onClick={wizard.goBack}
               disabled={!wizard.canGoBack}
-              className="px-6 py-3 text-gray-600 hover:text-gray-800 disabled:invisible transition-colors"
+              className="px-6 py-3 min-h-[44px] text-gray-600 hover:text-gray-800 disabled:invisible transition-colors"
             >
               Back
             </button>
@@ -68,7 +68,7 @@ export function WizardShell() {
             <button
               onClick={handleNext}
               disabled={wizard.isSubmitting}
-              className="bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold py-3 px-8 rounded-xl transition-colors"
+              className="bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold py-3 px-8 min-h-[44px] rounded-xl transition-colors"
             >
               {wizard.isSubmitting ? (
                 <span className="flex items-center gap-2">

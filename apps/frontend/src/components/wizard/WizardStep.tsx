@@ -82,7 +82,7 @@ function SingleSelect({
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
+          className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl border-2 transition-all ${
             value === opt.value
               ? 'border-teal-500 bg-teal-50 text-teal-800'
               : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -121,7 +121,7 @@ function MultiSelect({
         <button
           key={opt.value}
           onClick={() => toggle(opt.value)}
-          className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
+          className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl border-2 transition-all ${
             value.includes(opt.value)
               ? 'border-teal-500 bg-teal-50 text-teal-800'
               : 'border-gray-200 hover:border-gray-300 bg-white'
