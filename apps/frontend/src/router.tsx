@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, useParams } from 'react-router-dom';
 import { HomePage } from './pages/HomePage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { LoadingScreen } from './pages/LoadingScreen.js';
+import { ResultsPage } from './pages/ResultsPage.js';
 import { WizardShell } from './components/wizard/WizardShell.js';
 import { useSessionStatus } from './hooks/useSessionStatus.js';
 
@@ -38,18 +39,6 @@ function RequireSession({
   return <>{children}</>;
 }
 
-// Results page placeholder — will be built in Phase 5
-function ResultsPlaceholder() {
-  const { sessionId } = useParams<{ sessionId: string }>();
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-      <h2 className="text-2xl font-bold text-gray-700 mb-4">Results</h2>
-      <p className="text-gray-500">Results page coming in Phase 5</p>
-      <p className="text-sm text-gray-400 mt-2">Session: {sessionId}</p>
-    </div>
-  );
-}
-
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -75,7 +64,7 @@ export const router = createBrowserRouter([
     path: '/results/:sessionId',
     element: (
       <RequireSession requiredStatus="complete">
-        <ResultsPlaceholder />
+        <ResultsPage />
       </RequireSession>
     ),
   },
