@@ -20,7 +20,7 @@ const prefs: UserPreferences = {
 function makePet(overrides: Partial<RawPet>): RawPet {
   return {
     id: 'pf-1',
-    source: 'petfinder',
+    source: 'rescuegroups',
     sourceUrl: '',
     listingType: 'rescue',
     name: 'Buddy',

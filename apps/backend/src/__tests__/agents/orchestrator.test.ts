@@ -8,8 +8,6 @@ import { runPipeline } from '../../agents/orchestrator.js';
 import type { SSEEvent } from '@pawpal/shared';
 
 const CENSUS_URL = 'https://geocoding.geo.census.gov/geocoder/locations/address*';
-const PETFINDER_TOKEN_URL = 'https://api.petfinder.com/v2/oauth2/token';
-const PETFINDER_SEARCH_URL = 'https://api.petfinder.com/v2/animals*';
 const RESCUE_GROUPS_URL = 'https://api.rescuegroups.org/v5/public/animals/search/available';
 
 const server = setupServer();
@@ -29,34 +27,28 @@ function mockAllApis() {
         },
       }),
     ),
-    http.post(PETFINDER_TOKEN_URL, () =>
-      HttpResponse.json({ access_token: 'test-token', expires_in: 3600 }),
-    ),
-    http.get(PETFINDER_SEARCH_URL, () =>
+    http.post(RESCUE_GROUPS_URL, () =>
       HttpResponse.json({
-        animals: [{
-          id: 1,
-          type: 'Dog',
-          name: 'Buddy',
-          breeds: { primary: 'Golden Retriever', mixed: false },
-          age: 'Young',
-          gender: 'Male',
-          size: 'Large',
-          description: 'A friendly dog',
-          photos: [{ medium: 'https://example.com/photo.jpg' }],
-          status: 'adoptable',
-          tags: ['friendly'],
-          environment: { children: true, dogs: true, cats: null },
-          attributes: { spayed_neutered: true, house_trained: true, special_needs: false, shots_current: true },
-          contact: { address: { city: 'New York', state: 'NY', postcode: '10001' } },
-          url: 'https://petfinder.com/1',
-          published_at: '2026-01-01',
-          distance: 3.5,
+        data: [{
+          id: '123',
+          attributes: {
+            name: 'Buddy',
+            species: 'Dog',
+            breedPrimary: 'Golden Retriever',
+            ageGroup: 'Young',
+            sex: 'Male',
+            sizeGroup: 'Large',
+            descriptionText: 'A friendly dog',
+            pictureThumbnailUrl: 'https://example.com/photo.jpg',
+            url: 'https://rescuegroups.org/123',
+            distance: 3.5,
+            orgName: 'Happy Tails Rescue',
+            orgCity: 'New York',
+            orgState: 'NY',
+            orgPostalcode: '10001',
+          },
         }],
       }),
-    ),
-    http.post(RESCUE_GROUPS_URL, () =>
-      HttpResponse.json({ data: [] }),
     ),
   );
 }
@@ -98,14 +90,12 @@ const mockLog = {
 } as unknown as import('fastify').FastifyBaseLogger;
 
 const searchConfig = {
-  petfinderApiKey: 'test-key',
-  petfinderSecret: 'test-secret',
+  rescueGroupsApiKey: undefined,
 };
 
 describe('orchestrator runPipeline', () => {
   it('runs full pipeline and saves results on success', async () => {
     mockAllApis();
-    // Mock Anthropic — enrichment will fail gracefully (no API key)
     const { db, sessionId } = makeDbAndSession();
     const events: SSEEvent[] = [];
 
@@ -118,7 +108,6 @@ describe('orchestrator runPipeline', () => {
     expect(results).not.toBeNull();
     expect(results!.length).toBeGreaterThan(0);
 
-    // Check SSE events
     expect(events.some((e) => e.type === 'progress' && e.stage === 'intake')).toBe(true);
     expect(events.some((e) => e.stage === 'search')).toBe(true);
     expect(events.some((e) => e.type === 'progress' && e.stage === 'matching')).toBe(true);
@@ -135,7 +124,7 @@ describe('orchestrator runPipeline', () => {
     expect(db.getSession(sessionId)!.status).toBe('error');
   });
 
-  it('emits pipeline_error when both APIs fail', async () => {
+  it('emits pipeline_error when RescueGroups fails', async () => {
     server.use(
       http.get(CENSUS_URL, () =>
         HttpResponse.json({
@@ -147,7 +136,6 @@ describe('orchestrator runPipeline', () => {
           },
         }),
       ),
-      http.post(PETFINDER_TOKEN_URL, () => new HttpResponse(null, { status: 500 })),
       http.post(RESCUE_GROUPS_URL, () => new HttpResponse(null, { status: 500 })),
     );
 
@@ -164,7 +152,6 @@ describe('orchestrator runPipeline', () => {
     const { db, sessionId } = makeDbAndSession();
     const events: SSEEvent[] = [];
 
-    // Force an error by passing null answers
     await runPipeline(sessionId, null as unknown as Record<string, unknown>, 25, db, (e) => events.push(e), mockLog, searchConfig);
 
     expect(events.some((e) => e.type === 'pipeline_error')).toBe(true);

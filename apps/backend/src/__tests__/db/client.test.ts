@@ -60,7 +60,7 @@ describe('DbClient', () => {
     const mockResults: EnrichedPet[] = [
       {
         id: 'pf-1',
-        source: 'petfinder',
+        source: 'rescuegroups',
         sourceUrl: 'https://petfinder.com/1',
         listingType: 'rescue',
         name: 'Buddy',

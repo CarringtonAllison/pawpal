@@ -4,7 +4,7 @@ import type { RawPet, BreedTraits, UserPreferences } from '@pawpal/shared';
 
 const basePet: RawPet = {
   id: 'pf-1',
-  source: 'petfinder',
+  source: 'rescuegroups',
   sourceUrl: '',
   listingType: 'rescue',
   name: 'Buddy',
