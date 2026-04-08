@@ -137,7 +137,7 @@ describe('scoreMatch', () => {
   });
 
   it('scores compatibility using shelter data when available (children=true)', () => {
-    const prefs = { ...basePrefs, household: ['young_kids'] };
+    const prefs = { ...basePrefs, household: ['young_kids' as const] };
     const result = scoreMatch(basePet, prefs, baseTraits);
     expect(result.dimensionScores.compatibility).toBe(100); // shelter says children=true
   });
@@ -150,14 +150,14 @@ describe('scoreMatch', () => {
         environment: { children: null, dogs: null, cats: null },
       },
     };
-    const prefs = { ...basePrefs, household: ['young_kids'] };
+    const prefs = { ...basePrefs, household: ['young_kids' as const] };
     const result = scoreMatch(pet, prefs, baseTraits);
     // Golden Retriever goodWithKids=true → 50% confidence = 50
     expect(result.dimensionScores.compatibility).toBe(50);
   });
 
   it('returns 100 compatibility for adults_only household', () => {
-    const prefs = { ...basePrefs, household: ['adults_only'] };
+    const prefs = { ...basePrefs, household: ['adults_only' as const] };
     const result = scoreMatch(basePet, prefs, baseTraits);
     expect(result.dimensionScores.compatibility).toBe(100);
   });

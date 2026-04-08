@@ -13,12 +13,8 @@ export function deduplicate(pets: RawPet[]): RawPet[] {
       if (dropped.has(j)) continue;
 
       if (isDuplicate(best, pets[j])) {
-        // Keep Petfinder version (richer data), merge from the other
-        if (best.source === 'petfinder') {
-          best = mergePets(best, pets[j]);
-        } else {
-          best = mergePets(pets[j], best);
-        }
+        // Keep the first encountered version, merge data from the duplicate
+        best = mergePets(best, pets[j]);
         dropped.add(j);
       }
     }

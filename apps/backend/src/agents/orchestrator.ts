@@ -47,20 +47,35 @@ export async function runPipeline(
 
     // Stage 3: Matching
     const matching = await matchingAgent(search.data.pets, intake.data.validatedPrefs);
+    if (!matching.ok) {
+      db.updateSessionStatus(sessionId, 'error');
+      emitSSE({ type: 'pipeline_error', stage: 'matching', message: 'Failed to rank matches', code: 'MATCHING_FAILED', recoverable: true });
+      return;
+    }
     emitSSE({ type: 'progress', stage: 'matching', message: `Ranked ${matching.data.length} pets by compatibility` });
 
     // Stage 4: Enrichment (top 20 only)
     const top20 = matching.data.slice(0, 20);
     const enriched = await enrichmentAgent(top20, intake.data.validatedPrefs);
+    if (!enriched.ok) {
+      // Enrichment failure is non-fatal — use scored pets without explanations
+      log.warn({ sessionId }, 'Enrichment failed, using scored pets only');
+    }
 
     // Combine enriched top 20 with remaining scored pets (no explanations)
+    const enrichedPets = enriched.ok ? enriched.data : top20.map((pet) => ({
+      ...pet,
+      breedPhotos: [] as string[],
+      matchExplanation: null as string | null,
+      strengthLabels: [] as string[],
+    }));
     const remaining = matching.data.slice(20).map((pet) => ({
       ...pet,
       breedPhotos: [] as string[],
       matchExplanation: null as string | null,
       strengthLabels: [] as string[],
     }));
-    const finalResults = [...enriched.data, ...remaining];
+    const finalResults = [...enrichedPets, ...remaining];
 
     // Save & emit
     db.saveResults(sessionId, finalResults);
