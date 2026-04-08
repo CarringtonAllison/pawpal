@@ -80,7 +80,7 @@ export function PetDetailModal({ pet, onClose }: PetDetailModalProps) {
               <div className="flex items-center gap-2 mt-2">
                 <ListingTypeBadge listingType={pet.listingType} size="md" />
                 <span className="text-xs text-gray-400 px-2 py-0.5 bg-gray-100 rounded-full">
-                  via {pet.source === 'petfinder' ? 'Petfinder' : 'RescueGroups'}
+                  via RescueGroups
                 </span>
               </div>
             </div>
@@ -200,7 +200,7 @@ export function PetDetailModal({ pet, onClose }: PetDetailModalProps) {
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
                 >
-                  View on {pet.source === 'petfinder' ? 'Petfinder' : 'RescueGroups'} ↗
+                  View on RescueGroups ↗
                 </a>
               )}
             </div>
