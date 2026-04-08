@@ -1,0 +1,26 @@
+{
+  "name": "pawpal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pet finder application with multi-agent AI matching",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "dev:backend": "npm run dev -w @pawpal/backend",
+    "dev:frontend": "npm run dev -w @pawpal/frontend",
+    "build": "npm run build -w @pawpal/shared && npm run build -w @pawpal/backend && npm run build -w @pawpal/frontend",
+    "lint": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.3"
+  }
+}
